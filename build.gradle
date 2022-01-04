@@ -12,4 +12,16 @@ repositories {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation "io.kotest:kotest-runner-junit5:$kotest_version"
+    implementation "io.kotest:kotest-assertions-core:$kotest_version"
+}
+
+test {
+    useJUnitPlatform()
+
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+        exceptionFormat "full"
+        showStandardStreams = true
+    }
 }

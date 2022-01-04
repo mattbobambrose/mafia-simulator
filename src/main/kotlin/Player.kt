@@ -18,6 +18,26 @@ abstract class Player(val playerType: PlayerType) {
             choice = notInnocents.get(notInnocents.size)
         return choice
     }
+
+    open fun kill(players: List<Player>): Player {
+        TODO()
+    }
+
+    open fun save(
+        players: List<Player>,
+        justSaved: Player?,
+        knownDetective: Player?
+    ): Player {
+        TODO()
+    }
+
+    open fun investigate(players: List<Player>) {
+        TODO()
+    }
+
+    open fun comeOut(players: List<Player>, config: GameConfig): Player {
+        TODO()
+    }
 }
 
 enum class PlayerType {
@@ -33,20 +53,28 @@ enum class PublicGuiltType {
 }
 
 class Mafia : Player(MAFIA) {
-    fun kill(players: List<Player>): Player {
+    override fun kill(players: List<Player>): Player {
         val notMe = players.filter { it.playerType != MAFIA }
         return notMe[nextInt(notMe.size)]
+    }
+
+    fun kill(players: List<Player>, config: GameConfig) {
+
     }
 }
 
 class Angel : Player(ANGEL) {
-    fun save(players: List<Player>, justSaved: Player, detectiveCameOut: Boolean, knownDetective: Player): Player {
+    override fun save(
+        players: List<Player>,
+        justSaved: Player?,
+        knownDetective: Player?
+    ): Player {
         val notChosen = players.filter { justSaved != it }
-        val p: Player
-        if (!detectiveCameOut)
-            p = notChosen[nextInt(notChosen.size)]
-        else
+        val p: Player?
+        if (knownDetective != null)
             p = knownDetective
+        else
+            p = notChosen[nextInt(notChosen.size)]
         return p
     }
 }
@@ -57,7 +85,7 @@ class Detective : Player(DETECTIVE) {
         this.wasInvestigated = true
     }
 
-    fun investigate(players: List<Player>) {
+    override fun investigate(players: List<Player>) {
         val notChosen = players.filter { !it.wasInvestigated && it.playerType != DETECTIVE }
         val p = notChosen[nextInt(notChosen.size)]
         if (p.playerType == MAFIA)
@@ -66,18 +94,26 @@ class Detective : Player(DETECTIVE) {
             p.detectiveGuilt = D_INNOCENT
     }
 
-    fun comeOut(players: List<Player>, config: GameConfig) {
+    override fun comeOut(players: List<Player>, config: GameConfig): Player {
         val innocents = players.filter { it.detectiveGuilt == D_INNOCENT }
         val mafiaMembers = players.filter { it.detectiveGuilt == D_MAFIA }
         val unknowns = players.filter { it.detectiveGuilt == D_UNKNOWN }
         //s1 is if the detective found all the mafia
         val s1 = mafiaMembers.size == config.numberOfMafia
         //s2 is if all innocents have been found
-        val s2 = innocents.size == config.numberOfVillager + config.numberOfDetective + config.numberOfAngel
+        val s2 = innocents.size == players.size - config.numberOfMafia
 
         if (s1 || s2) {
-
+            for (i in innocents) {
+                i.publicGuilt == P_INNOCENT
+            }
+            for (i in mafiaMembers) {
+                i.publicGuilt == P_INNOCENT
+            }
         }
+
+
+        return players.find { it.playerType == DETECTIVE }!!
     }
 }
 
